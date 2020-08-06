@@ -18,12 +18,13 @@ function createCanvas (width, height) {
   return canvas
 }
 
-function createImg (onload) {
+// 新增用户自定义图片数组参数 akira 2020年8月6日
+function createImg (onload,images) {
   const img = new Image()
   img.crossOrigin = 'Anonymous'
   img.onload = onload
   img.onerror = () => {
-   img.setSrc(getRandomImgSrc()) // 图片加载失败的时候重新加载其他图片
+   img.setSrc(getRandomImgSrc(images)) // 图片加载失败的时候重新加载其他图片
   }
   
   img.setSrc = function (src) {
@@ -44,7 +45,7 @@ function createImg (onload) {
     else img.src = src
   }
 
-  img.setSrc(getRandomImgSrc())
+  img.setSrc(getRandomImgSrc(images))
   return img
 }
 
@@ -66,7 +67,17 @@ function removeClass (element, className) {
   element.classList.remove(styles[className])
 }
 
-function getRandomImgSrc () {
+// 新增用户自定义数组参数 akira 2020年8月6日
+function getRandomImgSrc (images) {
+  // 判断是否是本地图片,有则从用户传递进来的图片列表随机选取一张 akira --2020年8月6日
+  if(images.length > 0){
+    let url = images[getRandomNumberByRange(0,images.length)];
+    if(url){
+      return url;
+    } else {
+      return `https://picsum.photos/id/${getRandomNumberByRange(0, 1084)}/${w}/${h}`
+    }
+  }
   return `https://picsum.photos/id/${getRandomNumberByRange(0, 1084)}/${w}/${h}`
 }
 
@@ -97,7 +108,8 @@ function square (x) {
 }
 
 class Jigsaw {
-  constructor ({ el, width = w, height = h, onSuccess, onFail, onRefresh }) {
+  // 构造函数新增 images 参数,用来实现自定义图片 akira 2020年8月6日
+  constructor ({ el, width = w, height = h, images, onSuccess, onFail, onRefresh }) {
     Object.assign(el.style, {
       position: 'relative',
       width: width + 'px',
@@ -109,12 +121,16 @@ class Jigsaw {
     this.onSuccess = onSuccess
     this.onFail = onFail
     this.onRefresh = onRefresh
+    // 赋值images akira 2020年8月6日
+    this.images = images && images.length > 0 ? images : []
   }
 
   init () {
     this.initDOM()
     this.initImg()
     this.bindEvents()
+    // 返回实例,方便调用内部的 reset 等方法 akira --2020年8月6日
+    return this;
   }
 
   initDOM () {
@@ -174,10 +190,11 @@ class Jigsaw {
   }
   
   initImg () {
+    // 传递用户自定义图片数组 akira 2020年8月6日
     const img = createImg(() => {
       this.setLoading(false)
       this.draw(img)
-    })
+    },this.images)
     this.img = img
   }
 
@@ -291,7 +308,7 @@ class Jigsaw {
     
     // 重新加载图片
     this.setLoading(true)
-    this.img.setSrc(getRandomImgSrc())
+    this.img.setSrc(getRandomImgSrc(this.images))
   }
 }
 

@@ -8,14 +8,19 @@ canvas滑动验证码
 
 2.
 ```
-jigsaw.init({
+// 新增 init 方法返回一个实例,方便调用 reset 等方法
+let instance = jigsaw.init({
   el: document.getElementById('container'),
   width: 310, // 可选, 默认310
-  height: 155, // 可选, 默认155
+  height: 155, // 可选, 默认155,
+  images:[], // 新增自定义图片数组,如 ["/images/path/you/image.jpg',"/images/path/you/image-1.jpg",......]
   onSuccess: function () { ... },
   onFail: function () { ... },
   onRefresh: function () { ... }
 })
+
+// 重置验证器
+instance.reset()
 ```
 
 ### Tips：
